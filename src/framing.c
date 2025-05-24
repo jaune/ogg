@@ -640,18 +640,18 @@ int ogg_sync_wrote(ogg_sync_state *oy, long bytes){
 */
 
 long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
-  unsigned char *page;
   unsigned char *next;
   long bytes;
 
   if(ogg_sync_check(oy))return 0;
 
-  page=oy->data+oy->returned;
   bytes=oy->fill-oy->returned;
 
   if(oy->headerbytes==0){
     int headerbytes,i;
     if(bytes<27)return(0); /* not enough for a header */
+
+    unsigned char *page=oy->data+oy->returned;
 
     /* verify capture pattern */
     if(memcmp(page,"OggS",4))goto sync_fail;
@@ -673,6 +673,8 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
     /* Grab the checksum bytes, set the header field to zero */
     char chksum[4];
     ogg_page log;
+
+    unsigned char *page=oy->data+oy->returned;
 
     memcpy(chksum,page+22,4);
     memset(page+22,0,4);
@@ -701,6 +703,8 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
   /* yes, have a whole page all ready to go */
   {
     if(og){
+      unsigned char *page=oy->data+oy->returned;
+
       og->header=page;
       og->header_len=oy->headerbytes;
       og->body=page+oy->headerbytes;
@@ -718,6 +722,8 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
 
   oy->headerbytes=0;
   oy->bodybytes=0;
+
+  unsigned char *page=oy->data+oy->returned;
 
   /* search for possible capture */
   next=memchr(page+1,'O',bytes-1);
